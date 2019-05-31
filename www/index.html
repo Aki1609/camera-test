@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="js/jquery.mobile-1.4.5.css">
+<script src="js/jquery.js"></script>
+<script src="js/jquery.mobile-1.4.5.js"></script>
+<!--<script src="validation.js"></script>-->
+<!--script src="cordova.js"></script>-->
+<script type="text/javascript">
+	//document.addEventListener("deviceready", onDeviceReady, false);
+	function onDeviceReady(){
+			db=window.openDatabase("myappointmentDB", "1.0", "Simple Demo", 2*1024*1024);
+			db.transaction(createDB, errorCB, successCB);
+
+		}
+
+		function createDB(tx){
+		
+		tx.executeSql('CREATE TABLE IF NOT EXISTS appointment(id INT, firstname TEXT, lastname TEXT, address TEXT, telephone INT, mobilephone INT, email TEXT)');
+		alert("createDB");
+		}
+
+		function errorCB(err){
+		alert("SQL Error: "+err.code);
+		}
+
+		function successCB(){
+		alert("Database & Table Created");
+	}
+
+
+	function insertDB(tx){
+		var firstname=$("[name='firstname']").val();
+		var lastname=$("[name='lastname']").val();
+		var address=$("[name='address']").val();
+		var telephone=$("[name='telephone']").val();
+		var mobilephone=$("[name='mobilephone']").val();
+		var email=$("[name='email']").val();
+		var sql='INSERT INTO appointment (firstname, lastname, address, telephone, mobilephone, email) VALUES (?,?,?,?,?,?)';
+		tx.executeSql(sql,[firstname,lastname,address,telephone,mobilephone,email], successQueryDB, errorCB);
+	}
+
+	function successQueryDB(tx){
+		alert("Insert Successful");
+		tx.executeSql('SELECT * FROM appointment', [], renderListCB, errorCB)
+		
+	}
+
+
+	function renderListCB(tx, results){
+		var htmlString = ' ';
+		var len = results.rows.length;
+		for(var i=0; i<len;i++){
+		htmlString+='<li>'+results.rows.item(i).firstname+'<br>'+results.rows.item(i).lastname+'</li>'+results.rows.item(i).address+'<br>'+results.rows.item(i).telephone+'<br>'+results.rows.item(i).mobilephone+'<br>'+results.rows.item(i).email+'<br>';
+		}
+		$('#resultList').html(htmlString);
+		$('#resultList').listview('refresh');
+	}
+
+	function submitForm(){
+		onDeviceReady();
+		db.transaction(insertDB, errorCB);
+		$.mobile.changePage("#pagetwo",{reverse:"false", transition:"slide"});
+		return false;
+	}
+
+
+
+
+
+</script>
+
+</head>
+<body >
+	<div data-role="page" id="pageone" data-theme="a">
+<form name='registration' method="post" onSubmit="return submitForm()">
+
+
+
+<label class="ui-hidden-accessible" >First Name:</label>
+<input type="text" name="firstname" size="50" placeholder="First Name"/>
+
+<label class="ui-hidden-accessible">Last Name:</label>
+<input type="text" name="lastname" size="50" placeholder="Last Name" />
+
+
+<label class="ui-hidden-accessible">Address:</label>
+<input type="text" name="address" size="50" placeholder="Address"  />
+
+<label class="ui-hidden-accessible">Telephone Number:</label>
+<input type="text" name="telephone" placeholder="Telephone Number" />
+
+<label class="ui-hidden-accessible">Mobile phone Number:</label>
+<input type="text" name="mobilephone" placeholder="Mobile Phone"  />
+
+
+<label class="ui-hidden-accessible">Email:</label>
+<input type="text" name="email" size="50" placeholder="Your Email Address"  />
+
+
+<input type="submit" name="submit" value="Submit" />
+
+<input type="file" accept="image/*" capture="camera" />
+
+
+</form>
+</div>
+	
+	
+	
+	
+	
+</body>
+</html>
